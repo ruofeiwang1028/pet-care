@@ -6,9 +6,18 @@ import { services } from "@/data/site";
 type Errors = { name?: string; phone?: string };
 const field = "border-0 border-b border-ink/35 bg-transparent py-3 outline-none focus:border-forest focus:ring-0 aria-[invalid=true]:border-red-700";
 
+function tomorrowMorning() {
+  const date = new Date();
+  date.setDate(date.getDate() + 1);
+  date.setHours(9, 30, 0, 0);
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 export function BookingForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "success">("idle");
+  const [expectedArrival] = useState(tomorrowMorning);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); if (status !== "idle") return;
     const data = new FormData(event.currentTarget);
@@ -26,6 +35,7 @@ export function BookingForm() {
     <label className="flex flex-col text-xs font-bold">联系电话 <span className="text-red-700">*</span><input className={field} name="phone" type="tel" inputMode="numeric" autoComplete="tel" placeholder="11 位手机号码" aria-invalid={Boolean(errors.phone)} />{errors.phone && <small className="mt-1 text-red-700">{errors.phone}</small>}</label>
     <label className="flex flex-col text-xs font-bold">宠物类型<select className={field} name="pet"><option>狗狗</option><option>猫咪</option><option>其他宠物</option></select></label>
     <label className="flex flex-col text-xs font-bold">预约项目<select className={field} name="service">{services.map(s => <option key={s.slug}>{s.name}</option>)}</select></label>
+    <label className="col-span-full flex flex-col text-xs font-bold max-sm:col-auto">期望到店日期<input className={field} name="expectedArrival" type="datetime-local" defaultValue={expectedArrival} /></label>
     <button className="col-span-full mt-5 flex items-center justify-between bg-forest px-5 py-4 text-white disabled:opacity-60 max-sm:col-auto" type="submit" disabled={status === "submitting"}>{status === "submitting" ? "正在提交…" : "提交预约意向"}<span>→</span></button>
     <p className="col-span-full m-0 text-[9px] text-muted max-sm:col-auto">提交即表示您了解：这是前端演示表单，不会保存或发送任何资料。</p>
   </form>;
